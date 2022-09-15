@@ -1,0 +1,121 @@
+1. Ajustar el archivo 
+WEB-INF/classes/issi.properties
+Incorporando las siguientes propiedades:
+
+########################################################################################
+#                                FACTURACIÓN ELECTRÓNICA                               #
+########################################################################################
+#Para indicar si está activa la Facturación Electrónica, de lo contrario, rige la impresión fiscal.
+facturacion_electronica_activa=S
+#Para indicar el proveedor de Facturación Electrónica habilitado en la instalación
+proveedor_fe=HKA
+#Para indicar el ambiente de ejecución de Facturación Electrónica en HIS
+ambiente_fe=TEST
+########################################################################################
+
+
+2. Copiar los archivos en las respectivas carpetas:
+WEB-INF/lib/org.apache.commons.logging_1.2.0.v20180409-1502.jar
+WEB-INF/lib/javax.wsdl_1.6.2.v201012040545.jar
+WEB-INF/lib/jaxrpc.jar
+WEB-INF/lib/saaj.jar
+WEB-INF/lib/commons-discovery-0.2.jar
+WEB-INF/lib/axis.jar
+WEB-INF/lib/HTClientFE.jar
+WEB-INF/lib/HTClientFE-EBI-HKA.jar
+common/run_process.jsp
+common/factura_electronica.jsp
+common/check_provdistcorr.jsp
+caja/reg_forma_pago.jsp
+
+3. Crear la carpeta "facturaelectronica" dentro de la carpeta pdfdocs.
+- Carpeta pdfdocs/facturaelectronica debe quedar creada.
+
+4. Ejecutar los siguientes scripts (tomar nota de los que están en archivos aparte detallados abajo):
+ALTER TABLE TBL_FAC_DGI_DOCUMENTS ADD (
+    CODIGO_RESPUESTA_FE VARCHAR2(5)
+  , RESULTADO_RESPUESTA_FE VARCHAR2(20)
+  , MENSAJE_RESPUESTA_FE VARCHAR2(200)
+  , QR_FE VARCHAR2(1000)
+  , FECHA_RECEPCION_DGI_FE VARCHAR2(30)
+  , NRO_PROTOCOLO_AUTORIZACION_FE VARCHAR2(100)
+);
+
+ALTER TABLE TBL_ADM_EMPRESA ADD (
+  CODIGO_UBICACION_FE VARCHAR2(10)
+);
+
+ALTER TABLE TBL_ADM_MEDICO ADD (
+  CODIGO_UBICACION_FE VARCHAR2(10)
+);
+
+ALTER TABLE TBL_ADM_PACIENTE ADD (
+  CODIGO_UBICACION_FE VARCHAR2(10),
+  DIGITO_VERIFICADOR VARCHAR2(3)
+);
+
+ALTER TABLE TBL_PLA_EMPLEADO ADD (
+  CODIGO_UBICACION_FE VARCHAR2(10)
+);
+
+-- sp_fac_dgi_upd_ruc - Correr script del archivo SP_FAC_DGI_UPD_RUC.pls
+
+-- SP_FAC_UPD_DATOS_CLIENTE_FE - Correr script del archivo SP_FAC_UPD_DATOS_CLIENTE_FE.sql
+
+- Crear tabla
+CREATE TABLE TBL_ADM_FE_PROVDISTCORR (
+CODIGO_UBICACION VARCHAR2(10),
+PROVDISTCORR VARCHAR2(500),
+PROVINCIA VARCHAR2(200),
+DISTRITO  VARCHAR2(200),
+CORREGIMIENTO VARCHAR2(200)
+);
+
+-- Luego, ejecutar inserts de archivo TBL_ADM_FE_PROVDISTCORR.sql
+
+TBL_ADM_DGI_CPBS -- Correr script del archivo TBL_ADM_DGI_CPBS.sql
+
+-- CREAR TABLA 
+CREATE TABLE TBL_ADM_WS_FACT_ELEC (
+COMPANIA              NUMBER(2),
+WEBSERVICEURI         VARCHAR2(500), 
+MYNAMESPACE           VARCHAR2(500),
+MYNAMESPACEURI        VARCHAR2(500),
+TCOMPANYID            NUMBER(2),
+TUSR                  VARCHAR2(500),
+TPWD                  VARCHAR2(500),
+PROVEEDOR_FE          VARCHAR2(500),
+AMBIENTE              VARCHAR2(500)
+);
+
+ALTER TABLE TBL_CJA_FORMA_PAGO ADD (
+  CODIGO_FE VARCHAR2(2)
+);
+
+/
+
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '02' WHERE CODIGO = '0';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '02' WHERE CODIGO = '1';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '02' WHERE CODIGO = '2';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '03' WHERE CODIGO = '3';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '08' WHERE CODIGO = '4';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '08' WHERE CODIGO = '5';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '04' WHERE CODIGO = '6';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '01' WHERE CODIGO = '7';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '06' WHERE CODIGO = '9';
+UPDATE TBL_CJA_FORMA_PAGO SET CODIGO_FE = '02' WHERE CODIGO = '10';
+COMMIT;
+
+/
+
+ALTER TABLE TBL_FAC_TRX
+MODIFY (PRINTED_NO VARCHAR2(100));
+
+ALTER TABLE tbl_fac_dgi_documents
+MODIFY (CODIGO_DGI VARCHAR2(100));
+
+ALTER TABLE "AUDCELLBYTE"."AUD$FAC_DGI_DOCUMENTS"
+MODIFY (CODIGO_DGI VARCHAR2(100));
+
+ALTER TABLE "AUDCELLBYTE"."AUD$FAC_TRX" 
+MODIFY (PRINTED_NO VARCHAR2(100));
