@@ -3,13 +3,13 @@ WEB-INF/classes/issi.properties
 Incorporando las siguientes propiedades:
 
 ########################################################################################
-#                                FACTURACIÓN ELECTRÓNICA                               #
+#                                FACTURACIÃ“N ELECTRÃ“NICA                               #
 ########################################################################################
-#Para indicar si está activa la Facturación Electrónica, de lo contrario, rige la impresión fiscal.
+#Para indicar si estÃ¡ activa la FacturaciÃ³n ElectrÃ³nica, de lo contrario, rige la impresiÃ³n fiscal.
 facturacion_electronica_activa=S
-#Para indicar el proveedor de Facturación Electrónica habilitado en la instalación
+#Para indicar el proveedor de FacturaciÃ³n ElectrÃ³nica habilitado en la instalaciÃ³n
 proveedor_fe=HKA
-#Para indicar el ambiente de ejecución de Facturación Electrónica en HIS
+#Para indicar el ambiente de ejecuciÃ³n de FacturaciÃ³n ElectrÃ³nica en HIS
 ambiente_fe=TEST
 ########################################################################################
 
@@ -31,7 +31,7 @@ caja/reg_forma_pago.jsp
 3. Crear la carpeta "facturaelectronica" dentro de la carpeta pdfdocs.
 - Carpeta pdfdocs/facturaelectronica debe quedar creada.
 
-4. Ejecutar los siguientes scripts (tomar nota de los que están en archivos aparte detallados abajo):
+4. Ejecutar los siguientes scripts (tomar nota de los que estÃ¡n en archivos aparte detallados abajo):
 ALTER TABLE TBL_FAC_DGI_DOCUMENTS ADD (
     CODIGO_RESPUESTA_FE VARCHAR2(5)
   , RESULTADO_RESPUESTA_FE VARCHAR2(20)
@@ -87,6 +87,15 @@ TPWD                  VARCHAR2(500),
 PROVEEDOR_FE          VARCHAR2(500),
 AMBIENTE              VARCHAR2(500)
 );
+
+/
+
+REM INSERTING into TBL_ADM_WS_FACT_ELEC
+SET DEFINE OFF;
+Insert into TBL_ADM_WS_FACT_ELEC (COMPANIA,WEBSERVICEURI,MYNAMESPACE,MYNAMESPACEURI,TCOMPANYID,TUSR,TPWD,PROVEEDOR_FE,AMBIENTE) values (1,'https://demoemision.thefactoryhka.com.pa/ws/obj/v1.0/Service.svc',null,null,null,'bdqkdilvunuw_tfhka','J2joPV2.P*bj','HKA','TEST');
+COMMIT;
+
+/
 
 ALTER TABLE TBL_CJA_FORMA_PAGO ADD (
   CODIGO_FE VARCHAR2(2)
