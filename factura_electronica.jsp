@@ -794,7 +794,8 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
 
             Cliente cliente = new Cliente(
                 tipocliente.equals("02")?"02":tipocliente.equals("03")?"03":cdoE.getColValue("TIPO_CLIENTEFE") //String tipoClienteFE 01=Contribuyente, 02=No Contribuyente, 03=Gobierno
-                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?request.getParameter("tipoClienteHis")!=null&&request.getParameter("tipoClienteHis").equals("CTAS X COBRAR OTROS")?"1":"2":null) ///String tipoContribuyente
+                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?
+                        request.getParameter("tipoClienteHis")!=null&&(request.getParameter("tipoClienteHis").equals("ASEGURADOS")||request.getParameter("tipoClienteHis").equals("EMPRESA - CUENTAS HOSPITAL"))?"2":"1":null) ///String tipoContribuyente
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?cdoE.getColValue("CustomerRUC"):null) //String numeroRUC
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?cdoE.getColValue("DV"):null) //String digitoVerificadorRUC
                 , cdoE.getColValue("CUSTOMERNAME") //String razonSocial
