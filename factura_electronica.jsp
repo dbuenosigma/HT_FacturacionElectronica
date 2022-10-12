@@ -797,7 +797,7 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?
                         request.getParameter("tipoClienteHis")!=null&&(request.getParameter("tipoClienteHis").equals("ASEGURADOS")||request.getParameter("tipoClienteHis").equals("EMPRESA - CUENTAS HOSPITAL"))?"2":"1":null) ///String tipoContribuyente
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?cdoE.getColValue("CustomerRUC"):null) //String numeroRUC
-                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?cdoE.getColValue("DV"):null) //String digitoVerificadorRUC
+                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?dv_cliente:null) //String digitoVerificadorRUC
                 , cdoE.getColValue("CUSTOMERNAME") //String razonSocial
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?request.getParameter("direccion"):null)//cdoE.getColValue("DIRECCION") //String direccion
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?request.getParameter("ubicacion_fe"):null) //String codigoUbicacion
