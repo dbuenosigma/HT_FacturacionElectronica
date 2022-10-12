@@ -739,8 +739,8 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                       , "" //String fechaFabricacion
                       , "" //String fechaCaducidad
                       , null //String codigoCPBSAbrev
-                      , tipocliente.equals("03")?cdoI.getColValue("CODIGO_CPBS"):null //String codigoCPBS
-                      , "" //String unidadMedidaCPBS
+                      , cdoI.getColValue("CODIGO_CPBS") //String codigoCPBS
+                      , "und" //String unidadMedidaCPBS
                       , cdoI.getColValue("Desc") //String infoItem
                       , cdoI.getColValue("Price") //String precioUnitario
                       , cdoI.getColValue("damt") //String precioUnitarioDescuento
@@ -996,7 +996,7 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
 
             if (enviarResponse.getResultado().equals("error")) {
             %>
-            <script language="javascript">alert('<%=("ERROR RETORNADO POR EL PAC: " + enviarResponse.getMensaje())%>');</script>
+            <script language="javascript">alert('<%=("ERROR RETORNADO POR EL PAC: " + enviarResponse.getMensaje().replaceAll("[\\t\\n\\r]+"," "))%>');</script>
             <%
 
             } else if (enviarResponse != null && enviarResponse.getCufe() != null && !enviarResponse.getCufe().trim().equals("")) {
