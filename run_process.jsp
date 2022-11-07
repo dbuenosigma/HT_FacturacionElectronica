@@ -1319,13 +1319,16 @@ if (docType.equalsIgnoreCase("APP_PM") && (actType.equalsIgnoreCase("1") || actT
 		</tr>
 		<% if (docType.equalsIgnoreCase("DGI") /*&& ruc != null && ruc.trim().equals("")*/ && actType.equals("2")) { %>
 		<tr class="TextRow01">
-			<td align="center"><cellbytelabel>A nombre de: </cellbytelabel> <%=fb.textBox("nombre_2",nombre_2,true,false,(editClienteRuc.equals("N")),40,30)%></td>
+			<!--<td align="center"><cellbytelabel>A nombre de: </cellbytelabel> <%=fb.textBox("nombre_2",nombre_2,true,false,(editClienteRuc.equals("N")),40,30)%></td>-->
+			<td align="center"><cellbytelabel>A nombre de: </cellbytelabel> <%=fb.textBox("nombre_2",nombre_2,false,false,false,40,30)%></td>
 		</tr>
 		<tr class="TextRow01">
-			<td align="center"><cellbytelabel>Introduzca RUC/CEDULA: </cellbytelabel> <%=fb.textBox("ruc_cedula",identificacion_2,true,false,(editClienteRuc.equals("S") || (ruc != null && ruc.trim().equals(""))?false:true),40,30)%></td>
+			<!--<td align="center"><cellbytelabel>Introduzca RUC/CEDULA: </cellbytelabel> <%=fb.textBox("ruc_cedula",identificacion_2,true,false,(editClienteRuc.equals("S") || (ruc != null && ruc.trim().equals(""))?false:true),40,30)%></td>-->
+			<td align="center"><cellbytelabel>Introduzca RUC/CEDULA: </cellbytelabel> <%=fb.textBox("ruc_cedula",identificacion_2,false,false,false,40,30)%></td>
 		</tr>
 		<tr class="TextRow01">
-			<td align="center"><cellbytelabel>DV: </cellbytelabel> <%=fb.textBox("dv_nuevo",dv_2,true,false,(editClienteRuc.equals("S") || (dv != null && dv.trim().equals(""))?false:true),40,30)%></td>
+			<!--<td align="center"><cellbytelabel>DV: </cellbytelabel> <%=fb.textBox("dv_nuevo",dv_2,true,false,(editClienteRuc.equals("S") || (dv != null && dv.trim().equals(""))?false:true),40,30)%></td>-->
+			<td align="center"><cellbytelabel>DV: </cellbytelabel> <%=fb.textBox("dv_nuevo",dv_2,false,false,false,40,30)%></td>
 		</tr>
 		<tr class="TextRow01">
 			<td align="center"><cellbytelabel>E-mail: </cellbytelabel> <%=fb.textBox("e_mail",email_fe,false,false,false,40,50)%></td>
@@ -1341,7 +1344,7 @@ if (docType.equalsIgnoreCase("APP_PM") && (actType.equalsIgnoreCase("1") || actT
 		</tr>		
 		<tr class="TextRow01">
 			<td align="center"><cellbytelabel>Si el cliente es contribuyente o gobierno, seleccione su ubicaci&oacute;n: </cellbytelabel> 				
-				<%=fb.textBox("ubicacion_fe",codigo_ubicacion_fe,true,false,true,30,50,null,null,"")%>
+				<%=fb.textBox("ubicacion_fe",codigo_ubicacion_fe,false,false,false,30,50,null,null,"")%>
 				<%=fb.button("buscar","...",true,false,null,null,"onClick=\"javascript:selUbicacion()\"")%>
 				<%=fb.hidden("tipoClienteHis",tipoClienteHis)%>
 			</td>
@@ -1396,7 +1399,7 @@ if (docType.equalsIgnoreCase("APP_PM") && (actType.equalsIgnoreCase("1") || actT
 	        %>
 			<tr class="TextRow01">
 				<td align="center"><cellbytelabel><%=cdoI.getColValue("Code") + " - " + cdoI.getColValue("Desc")%> </cellbytelabel> 				
-					<%=fb.select(ConMgr.getConnection(),"select cpbs || '-" + cdoI.getColValue("Code") + "', cpbs ||' - '||descripcion from tbl_adm_dgi_cpbs","cpbs" + i,"",true,false,false,0,"Text10","","")%>
+					<%=fb.select(ConMgr.getConnection(),"select cpbs || '-" + cdoI.getColValue("Code") + "', cpbs ||' - '||descripcion from tbl_adm_dgi_cpbs","cpbs" + i,"",false,false,false,0,"Text10","","")%>
 					<%=fb.textBox("cpbsText" + i,"",false,false,false,30,50,null,null,"")%>
 					<%=fb.hidden("itemFECode" + i,cdoI.getColValue("Code"))%>
 				</td>

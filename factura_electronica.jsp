@@ -15,6 +15,9 @@
 <%@ page import="java.util.Base64"%>
 <%@ page import="java.util.Date"%>
 
+<%@ page import="java.math.BigDecimal"%>
+<%@ page import="java.math.RoundingMode"%>
+
 <%@ page import="java.util.ResourceBundle" %>
 
 <%@ page import="com.htconsulting.facturacionelectronica.datosenvio.DatosDocumento"%>
@@ -370,7 +373,7 @@ String q_items = "SELECT " +
                  "         ELSE " +
                  "            '00' " +
                  "         END AS \"Tax\", " +
-                 "     TO_CHAR(DESCUENTO, 'fm999999999999999990D00') AS \"damt\", " +
+                 "     TO_CHAR(NVL(DESCUENTO,0), 'fm999999999999999990D00') AS \"damt\", " +
                  "     CODIGO AS \"Code\", " +
                  "     CODIGO_CPBS, " +
                  "     TO_CHAR(IMPUESTO, 'fm999999999999999990D00') as \"MontoImpuesto\", " + //Precio del ítem. Si el ítem no es valorable: informar campo en 0.00 PrecioItem <> Cantidad * (PrecioUnitario - PrecioUnitarioDescuento)
@@ -718,7 +721,7 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
 
         try {
 
-	    d_enca = SQLMgr.getDataList(q_enca);
+	        d_enca = SQLMgr.getDataList(q_enca);
             d_items = SQLMgr.getDataList(q_items);
             d_Payments = SQLMgr.getDataList(q_Payments);
             d_WS = SQLMgr.getDataList(q_WS);
@@ -726,11 +729,40 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
             d_WS_FactElec = SQLMgr.getDataList(q_WS_FactElec);
 
             ArrayList<Item> listaItems = new ArrayList<Item>();
+            boolean copagoDescontado = false;
+            double totalTodosLosItems = 0;
+            double totalPrecioNeto = 0;
 
-	    for (int i=0; i<d_items.size(); i++)
+            CommonDataObject cdoE = (CommonDataObject) d_enca.get(0);
+            BigDecimal copagoValue = new BigDecimal(cdoE.getColValue("DISCOUNT")); //Copago
+
+	        for (int i=0; i<d_items.size(); i++)
             {
             	CommonDataObject cdoI = (CommonDataObject) d_items.get(i);
                 items = items + "   <Item Id=\""+cdoI.getColValue("ID")+"\" Price=\""+cdoI.getColValue("Price")+"\" Qty=\""+cdoI.getColValue("Qty")+"\" Desc=\""+cdoI.getColValue("Desc")+"\" Tax=\""+cdoI.getColValue("Tax")+"\" Code=\""+cdoI.getColValue("Code")+"\" damt=\""+cdoI.getColValue("damt")+"\"/>\n";
+
+                BigDecimal precioUnitarioValue = new BigDecimal(cdoI.getColValue("Price")); //PrecioUnitario
+                BigDecimal damtValue = new BigDecimal(cdoI.getColValue("damt"));
+                BigDecimal quantityValue = new BigDecimal(cdoI.getColValue("Qty"));
+                double descuentoUnitario = damtValue.doubleValue() / quantityValue.doubleValue();
+                double copagoUnitarioValue = copagoValue.doubleValue() / quantityValue.doubleValue();
+
+                double valorConDescuentoUnitario = precioUnitarioValue.doubleValue() - descuentoUnitario;
+                BigDecimal precioUnitarioDescuentoValue = null;
+                if ((copagoUnitarioValue < valorConDescuentoUnitario) && !copagoDescontado) {
+                   
+                   precioUnitarioDescuentoValue = new BigDecimal(descuentoUnitario + copagoUnitarioValue).setScale(2, RoundingMode.HALF_UP);
+                   copagoDescontado = true;
+                } else {
+                   precioUnitarioDescuentoValue = new BigDecimal(descuentoUnitario).setScale(2, RoundingMode.HALF_UP);
+                }
+
+                double precioItem = (precioUnitarioValue.doubleValue() - precioUnitarioDescuentoValue.doubleValue()) * quantityValue.doubleValue();
+                totalPrecioNeto += precioItem;
+
+                double valorTotalItem = precioItem + new BigDecimal(cdoI.getColValue("MontoImpuesto")).doubleValue();
+                totalTodosLosItems += valorTotalItem;
+
                 Item itemFE = new Item(
                         cdoI.getColValue("Desc") //String descripcion
                       , cdoI.getColValue("Code") //String codigo
@@ -743,11 +775,11 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                       , "und" //String unidadMedidaCPBS
                       , cdoI.getColValue("Desc") //String infoItem
                       , cdoI.getColValue("Price") //String precioUnitario
-                      , cdoI.getColValue("damt") //String precioUnitarioDescuento
-                      , cdoI.getColValue("PrecioItem") //String precioItem Precio del ítem. Si el ítem no es valorable: informar campo en 0.00 PrecioItem <> Cantidad * (PrecioUnitario - PrecioUnitarioDescuento)
+                      , precioUnitarioDescuentoValue.toString() //String precioUnitarioDescuento
+                      , new BigDecimal(precioItem).setScale(2, RoundingMode.HALF_UP).toString() //String precioItem Precio del ítem. Si el ítem no es valorable: informar campo en 0.00 PrecioItem <> Cantidad * (PrecioUnitario - PrecioUnitarioDescuento)
                       , "" //String precioAcarreo
                       , "" //String precioSeguro
-                      , cdoI.getColValue("ValorTotalItem") //String valorTotal
+                      , new BigDecimal(valorTotalItem).setScale(2, RoundingMode.HALF_UP).toString() //String valorTotal
                       , "" //String codigoGTIN
                       , "" //String cantGTINCom
                       , "" //String codigoGTINInv
@@ -780,8 +812,6 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                 formaPagoFact = cdoP.getColValue("CODIGO_FE");
                 
             }
-
-            CommonDataObject cdoE = (CommonDataObject) d_enca.get(0);
             
             CommonDataObject cdoUbicacion = ubicacion_fe!=null&&ubicacion_fe.trim()!=""?(CommonDataObject) d_ubicacion.get(0):null;
             
@@ -793,8 +823,9 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
             String ruc_cliente_fe = cdoE.getColValue("CustomerRUC");
 
             Cliente cliente = new Cliente(
-                tipocliente.equals("02")?"02":tipocliente.equals("03")?"03":cdoE.getColValue("TIPO_CLIENTEFE") //String tipoClienteFE 01=Contribuyente, 02=No Contribuyente, 03=Gobierno
-                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?
+                //tipocliente.equals("02")?"02":tipocliente.equals("03")?"03":cdoE.getColValue("TIPO_CLIENTEFE") //String tipoClienteFE 01=Contribuyente, 02=No Contribuyente, 03=Gobierno
+                  tipocliente               
+                , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("01")||tipocliente.equals("03"))?
                         request.getParameter("tipoClienteHis")!=null&&(request.getParameter("tipoClienteHis").equals("ASEGURADOS")||request.getParameter("tipoClienteHis").equals("EMPRESA - CUENTAS HOSPITAL"))?"2":request.getParameter("tipoClienteHis")==null||request.getParameter("tipoClienteHis").equals("")?"2":"1":null) ///String tipoContribuyente
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?cdoE.getColValue("CustomerRUC"):null) //String numeroRUC
                 , tipocliente.equals("02")?null:((cdoE.getColValue("TIPO_CLIENTEFE").equals("01")||tipocliente.equals("03"))?dv_cliente:null) //String digitoVerificadorRUC
@@ -890,6 +921,11 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                     "   Total + Terceros                           "+cdoE.getColValue("TOTAL_MAS_CT_TRAILER");
             }
 
+            if (copagoValue.doubleValue() > 0) {
+                informacionInteres += (" Copago: " + copagoValue.toString());
+            }
+
+
             DatosTransaccion datosGeneralesTransaccion = new DatosTransaccion(
                   "01" //String tipoEmision
                 , "" //String fechaInicioContingencia
@@ -921,25 +957,25 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                           formaPagoFact!=null?formaPagoFact:"99"//String formaPagoFact
                         //, descFormaPago!=null?"PAGADO CON " + descFormaPago:"PAGADO AL CONTADO" //String descFormaPago
                         , formaPagoFact==null||formaPagoFact.equals("99")?descFormaPago!=null?"PAGADO CON " + descFormaPago:"PAGADO AL CONTADO":null //String descFormaPago
-                        , cdoITot.getColValue("TotalFactura")//String valorCuotaPagada
+                        , new BigDecimal(totalTodosLosItems).setScale(2, RoundingMode.HALF_UP).toString() //String valorCuotaPagada
                         );
                 listaFormaPago.add(formaPago);
 
             TotalesSubTotales totalesSubTotales =
                 new TotalesSubTotales(
-                          cdoITot.getColValue("TotalPrecioNeto") //String totalPrecioNeto
+                          new BigDecimal(totalPrecioNeto).setScale(2, RoundingMode.HALF_UP).toString() //String totalPrecioNeto
                         , cdoITot.getColValue("TotalITBMS") //String totalITBMS
                         , "" //String totalISC
                         , cdoITot.getColValue("TotalITBMS") //String totalMontoGravado
                         , "0.00" //String totalDescuento
                         , "" //String totalAcarreoCobrado
                         , ""//String valorSeguroCobrado
-                        , cdoITot.getColValue("TotalFactura") //String totalFactura
-                        , cdoITot.getColValue("TotalFactura") //String totalValorRecibido
+                        , new BigDecimal(totalTodosLosItems).setScale(2, RoundingMode.HALF_UP).toString() //String totalFactura
+                        , new BigDecimal(totalTodosLosItems).setScale(2, RoundingMode.HALF_UP).toString() //String totalValorRecibido
                         , "0.00"//String vuelto
                         , "1" //String tiempoPago
                         , cdoITot.getColValue("NroItems") //String nroItems
-                        , cdoITot.getColValue("TotalTodosItems") //String totalTodosItems
+                        , new BigDecimal(totalTodosLosItems).setScale(2, RoundingMode.HALF_UP).toString() //String totalTodosItems
                         , null //ArrayList<DescuentoBonificacion> listaDescBonificacion
                         , listaFormaPago //ArrayList<FormaPago> listaFormaPago
                         , null//Retencion retencion
