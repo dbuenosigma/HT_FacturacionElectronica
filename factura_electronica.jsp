@@ -742,6 +742,7 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
                 items = items + "   <Item Id=\""+cdoI.getColValue("ID")+"\" Price=\""+cdoI.getColValue("Price")+"\" Qty=\""+cdoI.getColValue("Qty")+"\" Desc=\""+cdoI.getColValue("Desc")+"\" Tax=\""+cdoI.getColValue("Tax")+"\" Code=\""+cdoI.getColValue("Code")+"\" damt=\""+cdoI.getColValue("damt")+"\"/>\n";
 
                 BigDecimal precioUnitarioValue = new BigDecimal(cdoI.getColValue("Price")); //PrecioUnitario
+                //if (1 == 1) throw new Exception(cdoI.getColValue("Price"));
                 BigDecimal damtValue = new BigDecimal(cdoI.getColValue("damt"));
                 BigDecimal quantityValue = new BigDecimal(cdoI.getColValue("Qty"));
                 double descuentoUnitario = damtValue.doubleValue() / quantityValue.doubleValue();
@@ -1097,6 +1098,11 @@ if (docType.equalsIgnoreCase("DGI")) {//I M P R E S O R A   F I S C A L
 
                 grabarDocBase64FileSystem(descargaXMLResponse.getDocumento()
                     , directory + docNo + ".xml");
+
+        %><script language="javascript">
+            window.location.href = '../pdfdocs/facturaelectronica/' + '<%=docNo%>' + '.pdf';
+          </script>
+        <%                    
 
             }else{
                 sbSql = new StringBuffer();
